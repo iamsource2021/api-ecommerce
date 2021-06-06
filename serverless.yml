@@ -1,0 +1,65 @@
+service: api-ecommerce # NOTE: update this with your service name
+
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      inMemory: true
+      migrate: true
+      noStart: false
+      
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1 # NOTE: change with your preferred region
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - execute-api:ManageConnections
+      Resource: 'arn:aws:execute-api:*:*:*/development/POST/@connections/*'
+
+    - Effect: Allow
+      Action:
+        - dynamodb:BatchWriteItem
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource: !GetAtt UsersDynamoDBTable.Arn
+
+functions:  
+  httpHandler:
+    handler: src/index.handleHttp
+    events:
+      - http:
+          path: /
+          method: any
+          cors: true
+
+resources:
+  Resources:
+    UsersDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        # see DynamoDBSubscriptionManager
+        TableName: Users
+        AttributeDefinitions:
+          - AttributeName: userid
+            AttributeType: S
+          - AttributeName: id
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: userid
+            KeyType: HASH
+          - AttributeName: id
+            KeyType: RANGE    
+            
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-plugin-offline-dynamodb-stream
+  - serverless-offline
