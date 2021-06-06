@@ -1,22 +1,6 @@
-# chat-example-server
+# api-ecommerce
 
 ## How to use
-
-### Build all packages
-
-Run following command in project root
-
-```console
-yarn build
-```
-
-### Install dependencies
-
-In `chat-example-server` directory run following command
-
-```console
-yarn install
-```
 
 ### Local development
 
